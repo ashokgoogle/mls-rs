@@ -34,21 +34,20 @@ pub trait EpochRecord {
 /// group. It is up to the implementer of this trait to provide a mechanism
 /// to delete records that can be used by an application.
 ///
-
 #[cfg_attr(not(mls_build_async), maybe_async::must_be_sync)]
 #[cfg_attr(mls_build_async, maybe_async::must_be_async)]
 pub trait GroupStateStorage: Send + Sync {
     type Error: IntoAnyError;
 
     /// Fetch a group state from storage.
-    async fn state<T>(&self, group_id: &[u8]) -> Result<Option<T>, Self::Error>
+    async fn state<'a, T>(&self, group_id: &[u8]) -> Result<Option<T>, Self::Error>
     where
-        T: GroupState + MlsEncode + MlsDecode;
+        T: GroupState + Codec<'a>;
 
     /// Lazy load cached epoch data from a particular group.
-    async fn epoch<T>(&self, group_id: &[u8], epoch_id: u64) -> Result<Option<T>, Self::Error>
+    async fn epoch<'a, T>(&self, group_id: &[u8], epoch_id: u64) -> Result<Option<T>, Self::Error>
     where
-        T: EpochRecord + MlsEncode + MlsDecode;
+        T: EpochRecord + Codec<'a>;
 
     /// Write pending state updates.
     ///
@@ -69,17 +68,23 @@ pub trait GroupStateStorage: Send + Sync {
     /// of this trait. Calls to [`write`](GroupStateStorage::write) should
     /// optimally be a single atomic transaction in order to avoid partial writes
     /// that may corrupt the group state.
-    async fn write<ST, ET>(
+    async fn write<'a, ST, ET>(
         &mut self,
         state: ST,
         epoch_inserts: Vec<ET>,
         epoch_updates: Vec<ET>,
     ) -> Result<(), Self::Error>
     where
-        ST: GroupState + MlsEncode + MlsDecode + Send + Sync,
-        ET: EpochRecord + MlsEncode + MlsDecode + Send + Sync;
+        ST: GroupState + Codec<'a> + Send + Sync,
+        ET: EpochRecord + Codec<'a> + Send + Sync;
 
     /// The [`EpochRecord::id`] value that is associated with a stored
     /// prior epoch for a particular group.
     async fn max_epoch_id(&self, group_id: &[u8]) -> Result<Option<u64>, Self::Error>;
 }
+
+#[cfg(feature = "serde")]
+pub trait Codec<'a>: MlsEncode + serde::Serialize + MlsDecode + serde::Deserialize<'a> {}
+
+#[cfg(not(feature = "serde"))]
+pub trait Codec<'a>: MlsEncode + MlsDecode {}

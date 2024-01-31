@@ -2,10 +2,7 @@
 // Copyright by contributors to this project.
 // SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-use mls_rs_core::{
-    group::{EpochRecord, GroupState, GroupStateStorage},
-    mls_rs_codec::{MlsDecode, MlsEncode},
-};
+use mls_rs_core::group::{Codec, EpochRecord, GroupState, GroupStateStorage};
 use rusqlite::{params, Connection, OptionalExtension};
 use std::sync::{Arc, Mutex};
 
@@ -204,15 +201,15 @@ impl SqLiteGroupStateStorage {
 impl GroupStateStorage for SqLiteGroupStateStorage {
     type Error = SqLiteDataStorageError;
 
-    fn write<ST, ET>(
+    fn write<'a, ST, ET>(
         &mut self,
         state: ST,
         epoch_inserts: Vec<ET>,
         epoch_updates: Vec<ET>,
     ) -> Result<(), Self::Error>
     where
-        ST: GroupState + MlsEncode + MlsDecode + Send + Sync,
-        ET: EpochRecord + MlsEncode + MlsDecode + Send + Sync,
+        ST: GroupState + Codec<'a> + Send + Sync,
+        ET: EpochRecord + Codec<'a> + Send + Sync,
     {
         let group_id = state.id();
 
@@ -239,9 +236,9 @@ impl GroupStateStorage for SqLiteGroupStateStorage {
         self.update_group_state(group_id.as_slice(), snapshot_data, inserts, updates)
     }
 
-    fn state<T>(&self, group_id: &[u8]) -> Result<Option<T>, Self::Error>
+    fn state<'a, T>(&self, group_id: &[u8]) -> Result<Option<T>, Self::Error>
     where
-        T: GroupState + MlsEncode + MlsDecode,
+        T: GroupState + Codec<'a>,
     {
         self.get_snapshot_data(group_id)?
             .map(|v| T::mls_decode(&mut v.as_slice()))
@@ -253,9 +250,9 @@ impl GroupStateStorage for SqLiteGroupStateStorage {
         self.max_epoch_id(group_id)
     }
 
-    fn epoch<T>(&self, group_id: &[u8], epoch_id: u64) -> Result<Option<T>, Self::Error>
+    fn epoch<'a, T>(&self, group_id: &[u8], epoch_id: u64) -> Result<Option<T>, Self::Error>
     where
-        T: EpochRecord + MlsEncode + MlsDecode,
+        T: EpochRecord + Codec<'a>,
     {
         self.get_epoch_data(group_id, epoch_id)?
             .map(|v| T::mls_decode(&mut v.as_slice()))

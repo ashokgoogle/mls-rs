@@ -16,6 +16,7 @@ use super::Credential;
 )]
 /// MLS group member identity represented as a combination of a
 /// public [`SignaturePublicKey`] and [`Credential`].
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SigningIdentity {
     pub signature_key: SignaturePublicKey,
     pub credential: Credential,

@@ -67,6 +67,7 @@ mod interop_test_vectors;
 use crate::group::proposal::ProposalType;
 
 #[derive(Clone, Debug, MlsEncode, MlsDecode, MlsSize, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TreeKemPublic {
     #[cfg(feature = "tree_index")]
     index: TreeIndex,

@@ -10,8 +10,7 @@ use alloc::sync::Arc;
 #[cfg(mls_build_async)]
 use alloc::boxed::Box;
 use alloc::vec::Vec;
-use mls_rs_codec::{MlsDecode, MlsEncode};
-use mls_rs_core::group::{EpochRecord, GroupState, GroupStateStorage};
+use mls_rs_core::group::{Codec, EpochRecord, GroupState, GroupStateStorage};
 #[cfg(not(target_has_atomic = "ptr"))]
 use portable_atomic_util::Arc;
 
@@ -155,9 +154,9 @@ impl GroupStateStorage for InMemoryGroupStateStorage {
             .and_then(|group_data| group_data.epoch_data.back().map(|e| e.id)))
     }
 
-    async fn state<T>(&self, group_id: &[u8]) -> Result<Option<T>, Self::Error>
+    async fn state<'a, T>(&self, group_id: &[u8]) -> Result<Option<T>, Self::Error>
     where
-        T: mls_rs_core::group::GroupState + MlsDecode,
+        T: mls_rs_core::group::GroupState + Codec<'a>,
     {
         #[cfg(feature = "std")]
         let lock = self.inner.lock().unwrap();
@@ -170,9 +169,9 @@ impl GroupStateStorage for InMemoryGroupStateStorage {
             .map_err(Into::into)
     }
 
-    async fn epoch<T>(&self, group_id: &[u8], epoch_id: u64) -> Result<Option<T>, Self::Error>
+    async fn epoch<'a, T>(&self, group_id: &[u8], epoch_id: u64) -> Result<Option<T>, Self::Error>
     where
-        T: mls_rs_core::group::EpochRecord + MlsEncode + MlsDecode,
+        T: mls_rs_core::group::EpochRecord + Codec<'a>,
     {
         #[cfg(feature = "std")]
         let lock = self.inner.lock().unwrap();
@@ -187,15 +186,15 @@ impl GroupStateStorage for InMemoryGroupStateStorage {
             .map_err(Into::into)
     }
 
-    async fn write<ST, ET>(
+    async fn write<'a, ST, ET>(
         &mut self,
         state: ST,
         epoch_inserts: Vec<ET>,
         epoch_updates: Vec<ET>,
     ) -> Result<(), Self::Error>
     where
-        ST: GroupState + MlsEncode + MlsDecode + Send + Sync,
-        ET: EpochRecord + MlsEncode + MlsDecode + Send + Sync,
+        ST: GroupState + Codec<'a> + Send + Sync,
+        ET: EpochRecord + Codec<'a> + Send + Sync,
     {
         #[cfg(feature = "std")]
         let mut group_map = self.inner.lock().unwrap();
@@ -360,5 +359,12 @@ mod tests {
 
         let expected = EpochData::new(epoch_inserts.pop().unwrap()).unwrap();
         assert_eq!(stored.epoch_data[0], expected);
+    }
+
+    #[cfg(feature = "serde")]
+    #[maybe_async::test(not(mls_build_async), async(mls_build_async, crate::futures_test))]
+    async fn json_serialize() {
+        let snapshot = test_snapshot(1).await;
+        println!("{}", serde_json::to_string_pretty(&snapshot).unwrap());
     }
 }

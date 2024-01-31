@@ -19,6 +19,7 @@ use crate::group::secret_tree::SecretTree;
 
 #[cfg(feature = "prior_epoch")]
 #[derive(Debug, Clone, MlsEncode, MlsDecode, MlsSize, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct PriorEpoch {
     pub(crate) context: GroupContext,
     pub(crate) self_index: LeafIndex,
@@ -59,6 +60,7 @@ impl GroupStateProvider for PriorEpoch {
 }
 
 #[derive(Debug, Clone, PartialEq, MlsEncode, MlsDecode, MlsSize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct EpochSecrets {
     #[cfg(feature = "psk")]
     #[mls_codec(with = "mls_rs_codec::byte_vec")]
@@ -70,6 +72,7 @@ pub(crate) struct EpochSecrets {
 }
 
 #[derive(Clone, Debug, PartialEq, MlsEncode, MlsDecode, MlsSize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct SenderDataSecret(
     #[mls_codec(with = "mls_rs_codec::byte_vec")] Zeroizing<Vec<u8>>,
 );

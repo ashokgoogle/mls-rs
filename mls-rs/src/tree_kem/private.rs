@@ -8,6 +8,7 @@ use super::*;
 
 #[derive(Clone, Debug, MlsEncode, MlsDecode, MlsSize, Eq, PartialEq)]
 #[non_exhaustive]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TreeKemPrivate {
     pub self_index: LeafIndex,
     pub secret_keys: Vec<Option<HpkeSecretKey>>,

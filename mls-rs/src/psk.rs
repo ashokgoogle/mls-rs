@@ -29,6 +29,7 @@ pub use mls_rs_core::psk::{ExternalPskId, PreSharedKey};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, MlsSize, MlsEncode, MlsDecode)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct PreSharedKeyID {
     pub key_id: JustPreSharedKeyID,
     pub psk_nonce: PskNonce,
@@ -51,6 +52,7 @@ impl PreSharedKeyID {
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialOrd, PartialEq, MlsSize, MlsEncode, MlsDecode)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
 #[repr(u8)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) enum JustPreSharedKeyID {
     External(ExternalPskId) = 1u8,
     Resumption(ResumptionPsk) = 2u8,
@@ -58,10 +60,12 @@ pub(crate) enum JustPreSharedKeyID {
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialOrd, PartialEq, MlsSize, MlsEncode, MlsDecode)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct PskGroupId(#[mls_codec(with = "mls_rs_codec::byte_vec")] pub Vec<u8>);
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, MlsSize, MlsEncode, MlsDecode)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct PskNonce(#[mls_codec(with = "mls_rs_codec::byte_vec")] pub Vec<u8>);
 
 #[cfg(feature = "psk")]
@@ -77,6 +81,7 @@ impl PskNonce {
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialOrd, PartialEq, MlsSize, MlsEncode, MlsDecode)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct ResumptionPsk {
     pub usage: ResumptionPSKUsage,
     pub psk_group_id: PskGroupId,
@@ -86,6 +91,7 @@ pub(crate) struct ResumptionPsk {
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Ord, PartialOrd, MlsSize, MlsEncode, MlsDecode)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
 #[repr(u8)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) enum ResumptionPSKUsage {
     Application = 1u8,
     Reinit = 2u8,

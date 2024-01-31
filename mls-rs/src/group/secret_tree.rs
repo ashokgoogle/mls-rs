@@ -25,6 +25,7 @@ pub(crate) const MAX_RATCHET_BACK_HISTORY: u32 = 1024;
 
 #[derive(Clone, Debug, PartialEq, MlsSize, MlsEncode, MlsDecode)]
 #[repr(u8)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 enum SecretTreeNode {
     Secret(TreeSecret) = 0u8,
     Ratchet(SecretRatchets) = 1u8,
@@ -49,6 +50,7 @@ impl SecretTreeNode {
 }
 
 #[derive(Clone, Debug, PartialEq, MlsEncode, MlsDecode, MlsSize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 struct TreeSecret(#[mls_codec(with = "mls_rs_codec::byte_vec")] Zeroizing<Vec<u8>>);
 
 impl Deref for TreeSecret {
@@ -84,6 +86,7 @@ impl From<Zeroizing<Vec<u8>>> for TreeSecret {
 }
 
 #[derive(Clone, Debug, PartialEq, MlsEncode, MlsDecode, MlsSize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 struct TreeSecretsVec(Vec<Option<SecretTreeNode>>);
 
 impl Deref for TreeSecretsVec {
@@ -121,6 +124,7 @@ impl TreeSecretsVec {
 }
 
 #[derive(Clone, Debug, PartialEq, MlsEncode, MlsDecode, MlsSize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SecretTree {
     known_secrets: TreeSecretsVec,
     leaf_count: u32,
@@ -136,6 +140,7 @@ impl SecretTree {
 }
 
 #[derive(Clone, Debug, PartialEq, MlsSize, MlsEncode, MlsDecode)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SecretRatchets {
     pub application: SecretKeyRatchet,
     pub handshake: SecretKeyRatchet,
@@ -311,6 +316,7 @@ pub enum KeyType {
 )]
 #[derive(Debug, Clone, PartialEq, Eq, MlsEncode, MlsDecode, MlsSize)]
 /// AEAD key derived by the MLS secret tree.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MessageKeyData {
     #[mls_codec(with = "mls_rs_codec::byte_vec")]
     pub(crate) nonce: Zeroizing<Vec<u8>>,
@@ -341,6 +347,7 @@ impl MessageKeyData {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SecretKeyRatchet {
     secret: TreeSecret,
     generation: u32,

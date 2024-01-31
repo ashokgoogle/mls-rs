@@ -13,6 +13,7 @@ use mls_rs_core::error::IntoAnyError;
 #[derive(Debug, Clone, MlsSize, MlsEncode, MlsDecode, PartialEq, Eq)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
 #[repr(u8)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum LeafNodeSource {
     KeyPackage(Lifetime) = 1u8,
     Update = 2u8,
@@ -22,6 +23,7 @@ pub enum LeafNodeSource {
 #[derive(Debug, Clone, MlsSize, MlsEncode, MlsDecode, PartialEq)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
 #[non_exhaustive]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LeafNode {
     pub public_key: HpkePublicKey,
     pub signing_identity: SigningIdentity,

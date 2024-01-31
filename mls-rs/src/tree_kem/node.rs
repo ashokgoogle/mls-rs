@@ -14,6 +14,7 @@ use core::ops::{Deref, DerefMut};
 use mls_rs_codec::{MlsDecode, MlsEncode, MlsSize};
 
 #[derive(Clone, Debug, PartialEq, MlsSize, MlsEncode, MlsDecode)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct Parent {
     pub public_key: HpkePublicKey,
     pub parent_hash: ParentHash,
@@ -24,6 +25,7 @@ pub(crate) struct Parent {
     Clone, Copy, Debug, Ord, PartialEq, PartialOrd, Hash, Eq, MlsSize, MlsEncode, MlsDecode,
 )]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LeafIndex(pub(crate) u32);
 
 impl LeafIndex {
@@ -63,6 +65,7 @@ pub(crate) type NodeIndex = u32;
 #[derive(Clone, Debug, PartialEq, MlsSize, MlsEncode, MlsDecode)]
 #[allow(clippy::large_enum_variant)]
 #[repr(u8)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 //TODO: Research if this should actually be a Box<Leaf> for memory / performance reasons
 pub(crate) enum Node {
     Leaf(LeafNode) = 1u8,
@@ -153,6 +156,7 @@ impl NodeTypeResolver for Option<Node> {
 }
 
 #[derive(Clone, Debug, PartialEq, MlsSize, MlsEncode, MlsDecode, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct NodeVec(Vec<Option<Node>>);
 
 impl From<Vec<Option<Node>>> for NodeVec {

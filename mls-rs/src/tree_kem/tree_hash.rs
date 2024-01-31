@@ -20,6 +20,7 @@ use mls_rs_core::error::IntoAnyError;
 use core::ops::Deref;
 
 #[derive(Clone, Debug, Default, MlsSize, MlsEncode, MlsDecode, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct TreeHash(#[mls_codec(with = "mls_rs_codec::byte_vec")] Vec<u8>);
 
 impl Deref for TreeHash {
@@ -31,6 +32,7 @@ impl Deref for TreeHash {
 }
 
 #[derive(Clone, Debug, Default, MlsSize, MlsEncode, MlsDecode, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct TreeHashes {
     pub current: Vec<TreeHash>,
 }

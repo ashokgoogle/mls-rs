@@ -4,6 +4,7 @@
 
 use alloc::vec::Vec;
 use mls_rs_codec::MlsEncode;
+use mls_rs_core::group::Codec;
 pub use mls_rs_core::group::{EpochRecord, GroupState};
 
 use crate::group::snapshot::Snapshot;
@@ -18,11 +19,16 @@ impl EpochRecord for PriorEpoch {
     }
 }
 
+#[cfg(feature = "prior_epoch")]
+impl<'a> Codec<'a> for PriorEpoch {}
+
 impl GroupState for Snapshot {
     fn id(&self) -> Vec<u8> {
         self.group_id().to_vec()
     }
 }
+
+impl<'a> Codec<'a> for Snapshot {}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct EpochData {

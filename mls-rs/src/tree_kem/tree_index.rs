@@ -32,10 +32,12 @@ use mls_rs_core::crypto::HpkePublicKey;
 #[derive(
     Clone, Debug, Default, PartialEq, Eq, MlsSize, MlsEncode, MlsDecode, Hash, PartialOrd, Ord,
 )]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Identifier(#[mls_codec(with = "mls_rs_codec::byte_vec")] Vec<u8>);
 
 #[cfg(all(feature = "tree_index", feature = "std"))]
 #[derive(Clone, Debug, Default, PartialEq, MlsSize, MlsEncode, MlsDecode)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TreeIndex {
     credential_signature_key: HashMap<SignaturePublicKey, LeafIndex>,
     hpke_key: HashMap<HpkePublicKey, LeafIndex>,
@@ -47,6 +49,7 @@ pub struct TreeIndex {
 
 #[cfg(all(feature = "tree_index", not(feature = "std")))]
 #[derive(Clone, Debug, Default, PartialEq, MlsSize, MlsEncode, MlsDecode)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TreeIndex {
     credential_signature_key: BTreeMap<SignaturePublicKey, LeafIndex>,
     hpke_key: BTreeMap<HpkePublicKey, LeafIndex>,
@@ -299,6 +302,7 @@ impl TreeIndex {
 
 #[cfg(feature = "tree_index")]
 #[derive(Clone, Debug, Default, PartialEq, MlsEncode, MlsDecode, MlsSize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 struct TypeCounter {
     supported: u32,
     used: u32,

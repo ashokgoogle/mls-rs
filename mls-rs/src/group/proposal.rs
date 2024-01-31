@@ -19,6 +19,7 @@ use crate::psk::PreSharedKeyID;
 #[derive(Clone, Debug, PartialEq, MlsSize, MlsEncode, MlsDecode)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
 /// A proposal that adds a member to a [`Group`].
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AddProposal {
     pub(crate) key_package: KeyPackage,
 }
@@ -71,6 +72,7 @@ impl TryFrom<MlsMessage> for AddProposal {
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
 /// A proposal that will update an existing [`Member`] of a
 /// [`Group`]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UpdateProposal {
     pub(crate) leaf_node: LeafNode,
 }
@@ -98,6 +100,7 @@ impl UpdateProposal {
 
 #[derive(Clone, Debug, PartialEq, Eq, MlsSize, MlsEncode, MlsDecode)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 /// A proposal to remove an existing [`Member`] of a
 /// [`Group`].
 pub struct RemoveProposal {
@@ -123,6 +126,7 @@ impl From<u32> for RemoveProposal {
 #[cfg(feature = "psk")]
 #[derive(Clone, Debug, PartialEq, Eq, MlsSize, MlsEncode, MlsDecode)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 /// A proposal to add a pre-shared key to a group.
 pub struct PreSharedKeyProposal {
     pub(crate) psk: PreSharedKeyID,
@@ -146,6 +150,7 @@ impl PreSharedKeyProposal {
 
 #[derive(Clone, Debug, PartialEq, MlsSize, MlsEncode, MlsDecode)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 /// A proposal to reinitialize a group using new parameters.
 pub struct ReInitProposal {
     #[mls_codec(with = "mls_rs_codec::byte_vec")]
@@ -179,6 +184,7 @@ impl ReInitProposal {
 
 #[derive(Clone, Debug, PartialEq, Eq, MlsSize, MlsEncode, MlsDecode)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 /// A proposal used for external commits.
 pub struct ExternalInit {
     #[mls_codec(with = "mls_rs_codec::byte_vec")]
@@ -192,6 +198,7 @@ pub struct ExternalInit {
     all(feature = "ffi", not(test)),
     safer_ffi_gen::ffi_type(clone, opaque)
 )]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 /// A user defined custom proposal.
 ///
 /// User defined proposals are passed through the protocol as an opaque value.
@@ -262,6 +269,7 @@ pub trait MlsCustomProposal: MlsSize + MlsEncode + MlsDecode + Sized {
 #[repr(u16)]
 #[non_exhaustive]
 /// An enum that represents all possible types of proposals.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Proposal {
     Add(alloc::boxed::Box<AddProposal>),
     #[cfg(feature = "by_ref_proposal")]
@@ -503,6 +511,7 @@ impl<'a> From<&'a CustomProposal> for BorrowedProposal<'a> {
 #[derive(Clone, Debug, PartialEq, MlsSize, MlsEncode, MlsDecode)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
 #[repr(u8)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) enum ProposalOrRef {
     Proposal(Box<Proposal>) = 1u8,
     #[cfg(feature = "by_ref_proposal")]

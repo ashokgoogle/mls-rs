@@ -25,6 +25,7 @@ use super::{Credential, CredentialType, MlsCredential};
 /// Basic credentials are inherently insecure since they can not be
 /// properly validated. It is not recommended to use [`BasicCredential`]
 /// in production applications.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BasicCredential {
     /// Underlying identifier as raw bytes.
     #[mls_codec(with = "mls_rs_codec::byte_vec")]

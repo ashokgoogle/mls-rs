@@ -8,16 +8,17 @@ use alloc::boxed::Box;
 use alloc::vec::Vec;
 use core::ops::Deref;
 use mls_rs_codec::{MlsDecode, MlsEncode, MlsSize};
-use zeroize::Zeroizing;
+use zeroize::{ZeroizeOnDrop, Zeroizing};
 
-#[derive(Clone, Debug, PartialEq, Eq, MlsSize, MlsEncode, MlsDecode)]
+#[derive(Clone, Debug, PartialEq, Eq, MlsSize, MlsEncode, MlsDecode, ZeroizeOnDrop)]
 /// Wrapper type that holds a pre-shared key value and zeroizes on drop.
-pub struct PreSharedKey(#[mls_codec(with = "mls_rs_codec::byte_vec")] Zeroizing<Vec<u8>>);
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct PreSharedKey(#[mls_codec(with = "mls_rs_codec::byte_vec")] Vec<u8>);
 
 impl PreSharedKey {
     /// Create a new PreSharedKey.
     pub fn new(data: Vec<u8>) -> Self {
-        PreSharedKey(Zeroizing::new(data))
+        PreSharedKey(data)
     }
 
     /// Raw byte value.
@@ -34,7 +35,7 @@ impl From<Vec<u8>> for PreSharedKey {
 
 impl From<Zeroizing<Vec<u8>>> for PreSharedKey {
     fn from(bytes: Zeroizing<Vec<u8>>) -> Self {
-        Self(bytes)
+        Self(bytes.to_vec())
     }
 }
 
@@ -58,6 +59,7 @@ impl Deref for PreSharedKey {
     all(feature = "ffi", not(test)),
     safer_ffi_gen::ffi_type(clone, opaque)
 )]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 /// An external pre-shared key identifier.
 pub struct ExternalPskId(#[mls_codec(with = "mls_rs_codec::byte_vec")] Vec<u8>);
 

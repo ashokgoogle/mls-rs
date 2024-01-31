@@ -20,6 +20,7 @@ use super::CertificateChain;
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
 #[cfg_attr(all(feature = "ffi", not(test)), safer_ffi_gen::ffi_type)]
 #[repr(transparent)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CredentialType(u16);
 
 #[cfg_attr(all(feature = "ffi", not(test)), safer_ffi_gen::safer_ffi_gen)]
@@ -60,6 +61,7 @@ impl Deref for CredentialType {
     all(feature = "ffi", not(test)),
     safer_ffi_gen::ffi_type(clone, opaque)
 )]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 /// Custom user created credential type.
 ///
 /// # Warning
@@ -111,6 +113,7 @@ impl CustomCredential {
     safer_ffi_gen::ffi_type(clone, opaque)
 )]
 #[non_exhaustive]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Credential {
     /// Basic identifier-only credential.
     ///
