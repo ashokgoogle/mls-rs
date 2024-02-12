@@ -239,12 +239,13 @@ impl From<KeyPackage> for ReceivedMessage {
     safer_ffi_gen::ffi_type(clone, opaque)
 )]
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[non_exhaustive]
 /// Description of a MLS application message.
 pub struct ApplicationMessageDescription {
     /// Index of this user in the group state.
     pub sender_index: u32,
     /// Received application data.
-    data: ApplicationData,
+    pub data: ApplicationData,
     /// Plaintext authenticated data in the received MLS packet.
     pub authenticated_data: Vec<u8>,
 }
