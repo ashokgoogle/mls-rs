@@ -1824,7 +1824,7 @@ mod tests {
         client_builder::{test_utils::TestClientConfig, ClientBuilder, MlsConfig},
         crypto::test_utils::TestCryptoProvider,
         group::{
-            mls_rules::{CommitDirection, CommitSource},
+            mls_rules::{CommitDirection, CommitSource, DefaultMlsRules},
             proposal_filter::ProposalBundle,
         },
         identity::{
@@ -1838,9 +1838,6 @@ mod tests {
             UpdatePathNode,
         },
     };
-
-    #[cfg(any(feature = "private_message", feature = "custom_proposal"))]
-    use crate::group::mls_rules::DefaultMlsRules;
 
     #[cfg(feature = "prior_epoch")]
     use crate::group::padding::PaddingMode;
@@ -2670,8 +2667,6 @@ mod tests {
     #[cfg(feature = "state_update")]
     #[maybe_async::test(not(mls_build_async), async(mls_build_async, crate::futures_test))]
     async fn commit_description_external_commit() {
-        use crate::client::test_utils::TestClientBuilder;
-
         let mut alice_group = test_group(TEST_PROTOCOL_VERSION, TEST_CIPHER_SUITE).await;
 
         let (bob_identity, secret_key) = get_test_signing_identity(TEST_CIPHER_SUITE, b"bob").await;
@@ -2694,7 +2689,10 @@ mod tests {
             .await
             .unwrap();
 
-        let event = alice_group.process_message(commit).await.unwrap();
+        let event = alice_group
+            .process_message(commit.commit_message)
+            .await
+            .unwrap();
 
         let ReceivedMessage::Commit(commit_description) = event else {
             panic!("expected commit");
@@ -2716,31 +2714,36 @@ mod tests {
 
     #[maybe_async::test(not(mls_build_async), async(mls_build_async, crate::futures_test))]
     async fn can_join_new_group_externally() {
-        use crate::client::test_utils::TestClientBuilder;
-
         let mut alice_group = test_group(TEST_PROTOCOL_VERSION, TEST_CIPHER_SUITE).await;
 
-        let (bob_identity, secret_key) = get_test_signing_identity(TEST_CIPHER_SUITE, b"bob").await;
+        let (bob, _) =
+            test_client_with_key_pkg(TEST_PROTOCOL_VERSION, TEST_CIPHER_SUITE, "bob").await;
 
-        let bob = TestClientBuilder::new_for_test()
-            .signing_identity(bob_identity, secret_key, TEST_CIPHER_SUITE)
+        let bob = bob
+            .to_builder()
+            .mls_rules(
+                DefaultMlsRules::new()
+                    .with_commit_options(CommitOptions::new().with_allow_external_commit(true)),
+            )
             .build();
 
         let (_, commit) = bob
-            .external_commit_builder()
-            .unwrap()
-            .with_tree_data(alice_group.group.export_tree().into_owned())
-            .build(
-                alice_group
-                    .group
-                    .group_info_message_allowing_ext_commit(false)
-                    .await
-                    .unwrap(),
-            )
+            .commit_external(alice_group.external_commit_info().await)
             .await
             .unwrap();
 
-        alice_group.process_message(commit).await.unwrap();
+        alice_group
+            .process_message(commit.commit_message)
+            .await
+            .unwrap();
+
+        let (charlie, _) =
+            test_client_with_key_pkg(TEST_PROTOCOL_VERSION, TEST_CIPHER_SUITE, "charlie").await;
+
+        charlie
+            .commit_external(commit.external_commit_group_info.unwrap())
+            .await
+            .unwrap();
     }
 
     #[maybe_async::test(not(mls_build_async), async(mls_build_async, crate::futures_test))]
@@ -4084,7 +4087,10 @@ mod tests {
 
         if external_joiner_can_send_custom {
             let commit = commit.unwrap().1;
-            alice.process_incoming_message(commit).await.unwrap();
+            alice
+                .process_incoming_message(commit.commit_message)
+                .await
+                .unwrap();
         } else {
             assert_matches!(commit.map(|_| ()), Err(MlsError::MlsRulesError(_)));
         }
@@ -4121,7 +4127,10 @@ mod tests {
             .await
             .unwrap();
 
-        alice.process_incoming_message(commit).await.unwrap();
+        alice
+            .process_incoming_message(commit.commit_message)
+            .await
+            .unwrap();
     }
 
     #[cfg(feature = "custom_proposal")]

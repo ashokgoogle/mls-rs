@@ -40,7 +40,7 @@ use crate::group::{
     PreSharedKeyProposal, {JustPreSharedKeyID, PreSharedKeyID},
 };
 
-use super::ExportedTree;
+use super::{CommitOutput, ExportedTree};
 
 /// A builder that aids with the construction of an external commit.
 #[cfg_attr(all(feature = "ffi", not(test)), safer_ffi_gen::ffi_type(opaque))]
@@ -143,7 +143,7 @@ impl<C: ClientConfig> ExternalCommitBuilder<C> {
 
     /// Build the external commit using a GroupInfo message provided by an existing group member.
     #[cfg_attr(not(mls_build_async), maybe_async::must_be_sync)]
-    pub async fn build(self, group_info: MlsMessage) -> Result<(Group<C>, MlsMessage), MlsError> {
+    pub async fn build(self, group_info: MlsMessage) -> Result<(Group<C>, CommitOutput), MlsError> {
         let protocol_version = group_info.version;
 
         if !self.config.version_supported(protocol_version) {
@@ -262,6 +262,6 @@ impl<C: ClientConfig> ExternalCommitBuilder<C> {
 
         group.apply_pending_commit().await?;
 
-        Ok((group, commit_output.commit_message))
+        Ok((group, commit_output))
     }
 }

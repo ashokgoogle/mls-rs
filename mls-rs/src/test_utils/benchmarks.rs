@@ -132,7 +132,11 @@ pub async fn join_group(cs: CipherSuite, group_info: MlsMessage) -> GroupStates<
         .unwrap();
 
     let (receiver, commit) = client.commit_external(group_info).await.unwrap();
-    sender.process_incoming_message(commit).await.unwrap();
+
+    sender
+        .process_incoming_message(commit.commit_message)
+        .await
+        .unwrap();
 
     GroupStates { sender, receiver }
 }

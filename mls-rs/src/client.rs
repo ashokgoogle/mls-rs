@@ -14,7 +14,7 @@ use crate::group::{
     process_group_info,
     proposal::{AddProposal, Proposal},
 };
-use crate::group::{ExportedTree, Group, NewMemberInfo};
+use crate::group::{CommitOutput, ExportedTree, Group, NewMemberInfo};
 use crate::identity::SigningIdentity;
 use crate::key_package::{KeyPackageGeneration, KeyPackageGenerator};
 use crate::protocol_version::ProtocolVersion;
@@ -583,7 +583,7 @@ where
     pub async fn commit_external(
         &self,
         group_info_msg: MlsMessage,
-    ) -> Result<(Group<C>, MlsMessage), MlsError> {
+    ) -> Result<(Group<C>, CommitOutput), MlsError> {
         ExternalCommitBuilder::new(
             self.signer()?.clone(),
             self.signing_identity()?.0.clone(),
@@ -925,7 +925,7 @@ mod tests {
 
         let _ = alice_group
             .group
-            .process_incoming_message(external_commit.clone())
+            .process_incoming_message(external_commit.commit_message.clone())
             .await
             .unwrap();
 
@@ -933,7 +933,7 @@ mod tests {
 
         let message = bob_group
             .group
-            .process_incoming_message(external_commit)
+            .process_incoming_message(external_commit.commit_message)
             .await
             .unwrap();
 
@@ -1021,8 +1021,9 @@ mod tests {
         // If Carol tries to join Alice's group using the group info from Bob's group, that fails.
         let res = alice_group
             .group
-            .process_incoming_message(external_commit)
+            .process_incoming_message(external_commit.commit_message)
             .await;
+
         assert_matches!(res, Err(_));
     }
 

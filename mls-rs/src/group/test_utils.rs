@@ -151,6 +151,14 @@ impl TestGroup {
 
         self.group.format_for_wire(auth_content).await.unwrap()
     }
+
+    #[cfg_attr(not(mls_build_async), maybe_async::must_be_sync)]
+    pub(crate) async fn external_commit_info(&self) -> MlsMessage {
+        self.group
+            .group_info_message_allowing_ext_commit(true)
+            .await
+            .unwrap()
+    }
 }
 
 #[cfg_attr(not(mls_build_async), maybe_async::must_be_sync)]

@@ -524,7 +524,7 @@ async fn external_commits_work(
 
         for group in groups.iter_mut() {
             group
-                .process_incoming_message(commit.clone())
+                .process_incoming_message(commit.commit_message.clone())
                 .await
                 .unwrap();
         }
@@ -773,7 +773,7 @@ async fn external_joiner_can_process_siblings_update() {
 
     let (mut group, commit) = new_client.commit_external(info).await.unwrap();
 
-    all_process_message(&mut groups, &commit, 1, false).await;
+    all_process_message(&mut groups, &commit.commit_message, 1, false).await;
     groups.remove(1);
 
     // New client's sibling proposes an update to blank their common parent

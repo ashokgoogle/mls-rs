@@ -346,7 +346,7 @@ impl MlsClient for MlsClientImpl {
 
         let resp = ExternalJoinResponse {
             state_id,
-            commit: commit.to_bytes().unwrap(),
+            commit: commit.commit_message.to_bytes().unwrap(),
             epoch_authenticator,
         };
 
