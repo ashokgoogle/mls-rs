@@ -1189,7 +1189,7 @@ where
     #[cfg_attr(not(mls_build_async), maybe_async::must_be_sync)]
     async fn decrypt_incoming_ciphertext(
         &mut self,
-        message: PrivateMessage,
+        message: &PrivateMessage,
     ) -> Result<AuthenticatedContent, MlsError> {
         let epoch_id = message.epoch;
 
@@ -1592,7 +1592,7 @@ where
     #[cfg(feature = "private_message")]
     async fn process_ciphertext(
         &mut self,
-        cipher_text: PrivateMessage,
+        cipher_text: &PrivateMessage,
     ) -> Result<EventOrContent<Self::OutputType>, MlsError> {
         self.decrypt_incoming_ciphertext(cipher_text)
             .await
