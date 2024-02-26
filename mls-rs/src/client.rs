@@ -106,6 +106,9 @@ pub enum MlsError {
     MissingExternalPubExtension,
     #[cfg_attr(feature = "std", error("Epoch not found"))]
     EpochNotFound,
+    // Does this make more sense as a param of EpochNotFound eg EpochNotFound(Direction) where Direction is either PAST or FUTURE?
+    #[cfg_attr(feature = "std", error("Future epoch not found"))]
+    FutureEpochNotFound,
     #[cfg_attr(feature = "std", error("Unencrypted application message"))]
     UnencryptedApplicationMessage,
     #[cfg_attr(

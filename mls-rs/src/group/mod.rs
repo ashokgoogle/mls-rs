@@ -1201,6 +1201,11 @@ where
     ) -> Result<AuthenticatedContent, MlsError> {
         let epoch_id = message.epoch;
 
+        // Does this need a cfg flag?
+        if epoch_id > self.context().epoch {
+            return Err(MlsError::FutureEpochNotFound)
+        } 
+
         let auth_content = if epoch_id == self.context().epoch {
             let content = CiphertextProcessor::new(self, self.cipher_suite_provider.clone())
                 .open(message)
